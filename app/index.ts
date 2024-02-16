@@ -31,4 +31,10 @@ app.use((req: express.Request, res: express.Response) => {
     res.end();
 });
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+app.use((error: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    res.status(400);
+    res.end();
+});
+
 app.listen(8080);
