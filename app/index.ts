@@ -7,11 +7,22 @@ app.use(bodyParser.json());
 app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
     res.set({
         "Access-Control-Allow-Origin": req.headers.origin || "*",
-        "Access-Control-Allow-Methods": "POST, GET, OPTIONS, PUT, DELETE, PATH",
-        "Access-Control-Request-Headers": "*",
         "Access-Control-Allow-Credentials": !!req.headers.origin,
         Vary: "Origin",
     });
+
+    if (req.method === "OPTIONS") {
+        const defaultMethods = "POST, GET, OPTIONS, PUT, DELETE, PATCH";
+
+        res.set({
+            "Access-Control-Allow-Methods": req.headers["access-control-request-method"] ||
+            defaultMethods,
+            "Access-Control-Allow-Headers": req.headers["access-control-request-headers"] || "*",
+            "Access-Control-Max-Age": 3600,
+        });
+        res.status(200);
+        res.end();
+    }
     next();
 });
 
