@@ -2,6 +2,7 @@ import express from "express";
 import bodyParser from "body-parser";
 
 import methodsRouter from "./router/methods";
+import statusRouter from "./router/status";
 
 const app = express();
 app.use(bodyParser.json());
@@ -29,6 +30,7 @@ app.use((req: express.Request, res: express.Response, next: express.NextFunction
 });
 
 app.use("/methods", methodsRouter);
+app.use("/status", statusRouter);
 
 app.use((req: express.Request, res: express.Response) => {
     res.status(404);
