@@ -3,6 +3,7 @@ import express from "express";
 import methodsRouter from "./router/methods";
 import statusRouter from "./router/status";
 import authRouter from "./router/auth";
+import requestRouter from "./router/request";
 
 const app = express();
 
@@ -45,11 +46,7 @@ app.use((req, res, next) => {
 app.use("/methods", methodsRouter);
 app.use("/status", statusRouter);
 app.use("/authorization", authRouter);
-
-app.get("/ip", (req, res) => {
-    res.status(200);
-    res.send({ ip: req.headers.clientIp });
-});
+app.use("/request", requestRouter);
 
 app.use((req, res) => {
     res.status(404);
