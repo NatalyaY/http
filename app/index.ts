@@ -4,11 +4,14 @@ import methodsRouter from "./router/methods";
 import statusRouter from "./router/status";
 import authRouter from "./router/auth";
 import requestRouter from "./router/request";
+import responseRouter from "./router/response";
 
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+app.set("etag", false);
 
 app.use((req, res, next) => {
     res.set({
@@ -47,6 +50,7 @@ app.use("/methods", methodsRouter);
 app.use("/status", statusRouter);
 app.use("/authorization", authRouter);
 app.use("/request", requestRouter);
+app.use("/response", responseRouter);
 
 app.use((req, res) => {
     res.status(404);
