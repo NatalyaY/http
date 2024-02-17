@@ -1,14 +1,15 @@
 import express from "express";
-import bodyParser from "body-parser";
 
 import methodsRouter from "./router/methods";
 import statusRouter from "./router/status";
 import authRouter from "./router/auth";
 
 const app = express();
-app.use(bodyParser.json());
 
-app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.use((req, res, next) => {
     res.set({
         "Access-Control-Allow-Origin": req.headers.origin || "*",
         "Access-Control-Allow-Credentials": !!req.headers.origin,
@@ -30,11 +31,27 @@ app.use((req: express.Request, res: express.Response, next: express.NextFunction
     next();
 });
 
+app.use((req, res, next) => {
+    let forwarded = req.headers["x-forwarded-for"];
+
+    if (typeof forwarded === "string") {
+        forwarded = forwarded.split(", ");
+    }
+    const clientIp = forwarded?.[0] || req.socket.remoteAddress || "";
+    req.headers.clientIp = clientIp;
+    next();
+});
+
 app.use("/methods", methodsRouter);
 app.use("/status", statusRouter);
 app.use("/authorization", authRouter);
 
-app.use((req: express.Request, res: express.Response) => {
+app.get("/ip", (req, res) => {
+    res.status(200);
+    res.send({ ip: req.headers.clientIp });
+});
+
+app.use((req, res) => {
     res.status(404);
     res.end();
 });

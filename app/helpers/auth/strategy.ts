@@ -168,7 +168,7 @@ class DigitalAuthStrategy<
     }
 
     refreshFields(req: express.Request) {
-        const clientIp = req.headers["x-forwarded-for"]?.[0] || req.socket.remoteAddress || "";
+        const { clientIp } = req.headers;
 
         const {
             qops, algorithms,
