@@ -3,6 +3,7 @@ import bodyParser from "body-parser";
 
 import methodsRouter from "./router/methods";
 import statusRouter from "./router/status";
+import authRouter from "./router/auth";
 
 const app = express();
 app.use(bodyParser.json());
@@ -31,6 +32,7 @@ app.use((req: express.Request, res: express.Response, next: express.NextFunction
 
 app.use("/methods", methodsRouter);
 app.use("/status", statusRouter);
+app.use("/authorization", authRouter);
 
 app.use((req: express.Request, res: express.Response) => {
     res.status(404);
