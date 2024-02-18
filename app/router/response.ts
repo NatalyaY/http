@@ -92,7 +92,7 @@ const sendEncoded = (
 
         res.status(200);
         res.set({
-            "Content-Encoding": type,
+            "Content-Encoding": type === "brotli" ? "br" : type,
             "Content-Type": "application/json",
         });
         res.send(response);
