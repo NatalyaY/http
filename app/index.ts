@@ -5,6 +5,7 @@ import statusRouter from "./router/status";
 import authRouter from "./router/auth";
 import requestRouter from "./router/request";
 import responseRouter from "./router/response";
+import dynamicRouter from "./router/dynamic";
 
 const app = express();
 
@@ -51,6 +52,7 @@ app.use("/status", statusRouter);
 app.use("/authorization", authRouter);
 app.use("/request", requestRouter);
 app.use("/response", responseRouter);
+app.use("/dynamic-data", dynamicRouter);
 
 app.use((req, res) => {
     res.status(404);
