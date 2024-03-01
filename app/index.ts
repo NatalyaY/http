@@ -7,6 +7,7 @@ import requestRouter from "./router/request";
 import responseRouter from "./router/response";
 import dynamicRouter from "./router/dynamic";
 import cookiesRouter from "./router/cookies";
+import redirectRouter from "./router/redirect";
 
 const app = express();
 
@@ -55,6 +56,7 @@ app.use("/request", requestRouter);
 app.use("/response", responseRouter);
 app.use("/dynamic-data", dynamicRouter);
 app.use("/cookies", cookiesRouter);
+app.use("/redirect", redirectRouter);
 
 app.use((req, res) => {
     res.status(404);
