@@ -14,6 +14,42 @@ const parseNumber = (n: query, defaultValue: number) => (n && !Number.isNaN(+n)
     : defaultValue
 );
 
+const parseRangeHeader = (req: Request, bytes: number) => {
+    const headerStr = req.headers.range;
+    if (!headerStr) return null;
+
+    if (!headerStr.startsWith("bytes=")) {
+        return { malformed: true };
+    }
+
+    const range = headerStr
+        .replace("bytes=", "")
+        .split(",")[0]
+        .split("-");
+
+    let start = parseInt(range[0], 10);
+    let end = parseInt(range[1], 10);
+
+    if (Number.isNaN(start)) {
+        start = bytes - end;
+        end = bytes - 1;
+    } else if (Number.isNaN(end)) {
+        end = bytes - 1;
+    }
+
+    const isValid = !Number.isNaN(start) &&
+                    !Number.isNaN(end) &&
+                    start < end &&
+                    start >= 0 &&
+                    end < bytes;
+
+    return {
+        start,
+        end,
+        isValid,
+    };
+};
+
 class ReadableByParts extends Readable {
     constructor() {
         // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -120,6 +156,40 @@ router.get("/stream-chunks/:n", (req, res) => {
         step: safeSize,
         timeout: safeDuration,
     });
+});
+
+router.get("/range/:n", (req, res) => {
+    const safeBytes = parseNumber(req.params.n, 120);
+    const bytesBuffer = getStrByBytes(safeBytes);
+
+    const range = parseRangeHeader(req, safeBytes);
+
+    res.setHeader("Accept-Ranges", "bytes");
+
+    if (!range) {
+        res.status(200);
+        res.send(bytesBuffer);
+        return;
+    }
+
+    if (range.malformed) {
+        res.status(400);
+        res.end();
+        return;
+    }
+
+    if (!range.isValid) {
+        res.status(416);
+        res.end();
+        return;
+    }
+
+    const content = bytesBuffer.slice(range.start, range.end + 1);
+    res.status(206);
+    res.setHeader("Content-Type", "text/html; charset=utf-8");
+    res.setHeader("Content-Length", content.length - 1);
+    res.setHeader("Content-Range", `bytes ${range.start}-${range.end}/${safeBytes}`);
+    res.send(content);
 });
 
 export default router;
