@@ -40,15 +40,17 @@ abstract class AuthStrategy<T extends AuthSchemeName, A extends AuthFields = nul
     checkBaseAuthInfo(req: express.Request, res: express.Response, next: express.NextFunction) {
         const authData = parseAuthHeader(req);
 
-        if (authData?.scheme !== this.scheme) {
-            return requestAuthorization(res, this.scheme, this.getAuthFields());
-        }
-
-        if (!authData?.credentials) {
+        if (!this._checkAuthHeaderValidity(authData)) {
             return requestAuthorization(res, this.scheme, this.getAuthFields());
         }
 
         return next();
+    }
+
+    _checkAuthHeaderValidity(data: ReturnType<typeof parseAuthHeader>) {
+        if (data?.scheme !== this.scheme || !data?.credentials) {
+            return false;
+        }
     }
 
     abstract checkCredentials(
@@ -78,14 +80,41 @@ class BasicAuthStrategy<A extends AuthFields> extends AuthStrategy<"Basic", A> {
             return;
         }
 
-        const decodedCredentials = decodeBase64(authData.credentials);
+        if (!this._checkCredentialsValidity(authData, req)) {
+            return requestAuthorization(res, this.scheme, this.getAuthFields());
+        }
+        return next();
+    }
+
+    hiddenCheck(
+        req: express.Request,
+        res: express.Response,
+        next: express.NextFunction,
+    ) {
+        const authData = parseAuthHeader(req);
+
+        if (!authData ||
+            !this._checkAuthHeaderValidity(authData) ||
+            !this._checkCredentialsValidity(authData, req)
+        ) {
+            res.status(404);
+            res.end();
+            return;
+        }
+        return next();
+    }
+
+    _checkCredentialsValidity(
+        data: NonNullable<ReturnType<typeof parseAuthHeader>>,
+        req: express.Request,
+    ) {
+        const decodedCredentials = decodeBase64(data.credentials);
         const user = req.params[this.reqParamNames.user];
         const password = req.params[this.reqParamNames.password];
 
         if (`${user}:${password}` !== decodedCredentials) {
-            return requestAuthorization(res, this.scheme, this.getAuthFields());
+            return false;
         }
-        return next();
     }
 }
 

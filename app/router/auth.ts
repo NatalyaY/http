@@ -43,6 +43,15 @@ router.get(
 );
 
 router.get(
+    "/hidden-basic/:user/:password",
+    basicAuth.hiddenCheck.bind(basicAuth),
+    (req, res) => {
+        res.status(200);
+        res.send("Authorized by Base Auth!");
+    },
+);
+
+router.get(
     "/bearer/:token",
     bearerAuth.checkBaseAuthInfo.bind(bearerAuth),
     bearerAuth.checkCredentials.bind(bearerAuth),
