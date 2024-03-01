@@ -6,6 +6,7 @@ import authRouter from "./router/auth";
 import requestRouter from "./router/request";
 import responseRouter from "./router/response";
 import dynamicRouter from "./router/dynamic";
+import cookiesRouter from "./router/cookies";
 
 const app = express();
 
@@ -53,6 +54,7 @@ app.use("/authorization", authRouter);
 app.use("/request", requestRouter);
 app.use("/response", responseRouter);
 app.use("/dynamic-data", dynamicRouter);
+app.use("/cookies", cookiesRouter);
 
 app.use((req, res) => {
     res.status(404);
